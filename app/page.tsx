@@ -49,6 +49,7 @@ export default function Home() {
         <div className="cover-image"><img src="/images/iryna-hero.jpg" alt="Ірина, авторка New Model Way" /></div>
         <div className="cover-title" aria-label="New Model Way"><span>NEW</span><span>MODEL</span><em>WAY</em></div>
         <div className="cover-title cover-title-outline" aria-hidden="true"><span>NEW</span><span>MODEL</span><em>WAY</em></div>
+        <div className="cover-model" aria-hidden="true"><img src="/images/iryna-cutout.png" alt="" /></div>
         <p className="hero-detail detail-top">Онлайн-курс для майбутніх<br />комерційних моделей</p>
         <p className="hero-detail detail-right">Старт 10.01.2027<br />Навчання онлайн</p>
         <p className="hero-detail detail-bottom">Модулі <span>·</span> практика <span>·</span> портфоліо <span>·</span> бренди</p>
