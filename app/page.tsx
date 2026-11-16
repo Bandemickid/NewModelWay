@@ -11,34 +11,49 @@ const barriers = [
   ["Хочу заробляти на зйомках, але в мене немає зв’язків.", "Тепер у тебе є я. Зовсім скоро з’являться сотні знайомих у світі моделінгу."],
 ];
 
-const questions = [
-  ["Чи потрібен досвід?", "Ні. Курс створений для тих, хто лише починає, а також для моделей із першим досвідом."],
-  ["Чи потрібні модельні параметри?", "Ні. У комерційному моделінгу цінують характер, типаж і вміння працювати в кадрі."],
-  ["Чи можна навчатися з іншої країни?", "Так. Основна програма повністю онлайн."],
-  ["Коли старт навчання?", "10 січня 2027 року."],
+const promotionDeadline = new Date("2026-11-27T23:59:59+02:00").getTime();
+
+const pricingPlans = [
+  {
+    name: "MODEL START",
+    label: "Самостійне навчання",
+    current: "9 900 грн",
+    full: "14 900 грн",
+    saving: "5 000 грн",
+    seats: "Без обмежень",
+    cta: "ОПЛАТИТИ START",
+    features: ["1–5", "—", "—", "—", "—", "—"],
+  },
+  {
+    name: "NEW MODEL PRO",
+    label: "Повна програма з підтримкою",
+    current: "14 900 грн",
+    full: "19 900 грн",
+    saving: "5 000 грн",
+    seats: "100",
+    cta: "ОПЛАТИТИ PRO",
+    recommended: true,
+    features: ["Усі 6", "✓", "✓", "✓", "—", "—"],
+  },
+  {
+    name: "VIP MODEL WAY",
+    label: "Максимум персональної уваги",
+    current: "39 900 грн",
+    full: "49 900 грн",
+    saving: "10 000 грн",
+    seats: "10",
+    cta: "ОПЛАТИТИ VIP",
+    features: ["Усі 6", "✓", "✓", "✓", "✓", "✓"],
+  },
 ];
 
-const outcomes = [
-  "Визначити свій напрямок у комерційному моделінгу.",
-  "Працювати перед камерою, позувати та передавати потрібні емоції.",
-  "Підготувати професійні digitals і модельне портфоліо.",
-  "Оформити Instagram як сторінку комерційної моделі.",
-  "Самостійно знаходити бренди та рекламні проєкти.",
-  "Домовлятися про співпрацю з потенційними клієнтами.",
-  "Визначати вартість своєї роботи та обговорювати умови оплати.",
-  "Професійно поводитися на рекламних зйомках.",
-  "Розвиватися у напрямках UGC та моделі-інфлюенсера.",
-];
-
-const outcomePhotos = [
-  ["/images/hero-fashion-1.jpg", "Твій типаж"],
-  ["/images/hero-fashion-2.jpg", "Кадр і позування"],
-  ["/images/hero-fashion-3.jpg", "Портфоліо"],
-  ["/images/dream-feature.jpg", "Commercial image"],
-  ["/images/iryna-letter.jpg", "Особистий бренд"],
-  ["/images/iryna-solution.jpg", "Зйомки для брендів"],
-  ["/images/hero-portrait.jpg", "Співпраця"],
-  ["/images/hero-editorial-1.jpg", "UGC та influence"],
+const priceFeatures = [
+  "Модулі",
+  "Перевірка завдань Іриною",
+  "Загальний чат",
+  "Випускний, зйомка, сертифікат",
+  "Особистий чат з Іриною",
+  "Розбір портфоліо, Instagram і модельної пропозиції",
 ];
 
 const courseModules = [
@@ -134,31 +149,146 @@ function LetterText({ children, startDelay }: { children: string; startDelay: nu
 }
 
 export default function Home() {
-  const [openQuestion, setOpenQuestion] = useState<number | null>(null);
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const [heroReady, setHeroReady] = useState(false);
   const [letterVisible, setLetterVisible] = useState(false);
   const [letterStage, setLetterStage] = useState<LetterStage>("waiting");
   const [dreamVisible, setDreamVisible] = useState(false);
+  const [barriersVisible, setBarriersVisible] = useState(false);
   const [storyVisible, setStoryVisible] = useState(false);
   const [turnVisible, setTurnVisible] = useState(false);
   const [solutionVisible, setSolutionVisible] = useState(false);
-  const [outcomesVisible, setOutcomesVisible] = useState(false);
   const [courseVisible, setCourseVisible] = useState(false);
+  const [audienceVisible, setAudienceVisible] = useState(false);
+  const [learningVisible, setLearningVisible] = useState(false);
+  const [graduationVisible, setGraduationVisible] = useState(false);
+  const [pricingVisible, setPricingVisible] = useState(false);
+  const [finalCallVisible, setFinalCallVisible] = useState(false);
+  // Keep the first server and browser render identical. The real countdown starts
+  // immediately after hydration in the effect below.
+  const [timeLeft, setTimeLeft] = useState(0);
   const letterRef = useRef<HTMLElement>(null);
   const letterSequenceStarted = useRef(false);
   const dreamRef = useRef<HTMLElement>(null);
+  const barriersRef = useRef<HTMLElement>(null);
   const storyRef = useRef<HTMLElement>(null);
   const turnRef = useRef<HTMLDivElement>(null);
   const solutionRef = useRef<HTMLDivElement>(null);
-  const outcomesRef = useRef<HTMLElement>(null);
   const courseRef = useRef<HTMLElement>(null);
+  const audienceRef = useRef<HTMLElement>(null);
+  const learningRef = useRef<HTMLElement>(null);
+  const graduationRef = useRef<HTMLElement>(null);
+  const pricingRef = useRef<HTMLElement>(null);
+  const pricingTrackRef = useRef<HTMLDivElement>(null);
+  const finalCallRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const track = pricingTrackRef.current;
+    if (!track) return;
+
+    const autoScroll = window.matchMedia("(max-width: 800px) and (prefers-reduced-motion: no-preference)");
+    let timeout: number | undefined;
+    let touching = false;
+
+    const advance = () => {
+      const bounds = track.getBoundingClientRect();
+      const end = track.scrollWidth - track.clientWidth;
+      if (!autoScroll.matches || document.hidden || touching ||
+        track.contains(document.activeElement) ||
+        bounds.top >= window.innerHeight || bounds.bottom <= 0 || end <= 0) {
+        schedule();
+        return;
+      }
+
+      const step = end / (pricingPlans.length - 1);
+      const next = (Math.round(track.scrollLeft / step) + 1) % pricingPlans.length;
+      track.scrollTo({ left: next * step, behavior: "smooth" });
+      schedule();
+    };
+
+    function schedule() {
+      window.clearTimeout(timeout);
+      if (autoScroll.matches) timeout = window.setTimeout(advance, 7500);
+    }
+
+    const startTouch = () => {
+      touching = true;
+      window.clearTimeout(timeout);
+    };
+
+    const endTouch = () => {
+      touching = false;
+      schedule();
+    };
+
+    track.addEventListener("scroll", schedule, { passive: true });
+    track.addEventListener("touchstart", startTouch, { passive: true });
+    track.addEventListener("touchend", endTouch, { passive: true });
+    track.addEventListener("touchcancel", endTouch, { passive: true });
+    autoScroll.addEventListener("change", schedule);
+    schedule();
+
+    return () => {
+      window.clearTimeout(timeout);
+      track.removeEventListener("scroll", schedule);
+      track.removeEventListener("touchstart", startTouch);
+      track.removeEventListener("touchend", endTouch);
+      track.removeEventListener("touchcancel", endTouch);
+      autoScroll.removeEventListener("change", schedule);
+    };
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setHeaderScrolled(window.scrollY > 24);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const graduation = graduationRef.current;
+    if (!graduation) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setGraduationVisible(true);
+      observer.disconnect();
+    }, { threshold: 0.18 });
+    const heading = window.matchMedia("(max-width: 800px)").matches
+      ? graduation.querySelector(".graduation-copy h2")
+      : null;
+    observer.observe(heading ?? graduation);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const pricing = pricingRef.current;
+    if (!pricing) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setPricingVisible(true);
+      observer.disconnect();
+    }, { threshold: 0.12 });
+    observer.observe(pricing);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const finalCall = finalCallRef.current;
+    if (!finalCall) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setFinalCallVisible(true);
+      observer.disconnect();
+    }, { threshold: 0.16 });
+    observer.observe(finalCall);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const updateTimer = () => setTimeLeft(Math.max(0, promotionDeadline - Date.now()));
+    updateTimer();
+    const timer = window.setInterval(updateTimer, 1000);
+    return () => window.clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -171,6 +301,18 @@ export default function Home() {
       }
     }, { threshold: 0.18 });
     observer.observe(dream);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const barriersSection = barriersRef.current;
+    if (!barriersSection) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setBarriersVisible(true);
+      observer.disconnect();
+    }, { threshold: 0.14 });
+    observer.observe(barriersSection);
     return () => observer.disconnect();
   }, []);
 
@@ -214,19 +356,6 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const outcomesSection = outcomesRef.current;
-    if (!outcomesSection) return;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setOutcomesVisible(true);
-        observer.disconnect();
-      }
-    }, { threshold: 0.18 });
-    observer.observe(outcomesSection);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
     const courseSection = courseRef.current;
     if (!courseSection) return;
     const observer = new IntersectionObserver(([entry]) => {
@@ -236,6 +365,51 @@ export default function Home() {
       }
     }, { threshold: 0.12 });
     observer.observe(courseSection);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const audience = audienceRef.current;
+    if (!audience) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setAudienceVisible(true);
+      observer.disconnect();
+    }, { threshold: 0.18 });
+    const casting = window.matchMedia("(max-width: 800px)").matches
+      ? audience.querySelector(".audience-casting")
+      : null;
+    observer.observe(casting ?? audience);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const learning = learningRef.current;
+    if (!learning) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setLearningVisible(true);
+      observer.disconnect();
+    }, { threshold: 0.2 });
+    const heading = window.matchMedia("(max-width: 800px)").matches
+      ? learning.querySelector(".learning-heading")
+      : null;
+    observer.observe(heading ?? learning);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const courseSection = courseRef.current;
+    if (!courseSection || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const frames = Array.from(courseSection.querySelectorAll<HTMLElement>(".course-frame"));
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-in-view");
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: "0px 0px -24px" });
+    frames.forEach((frame) => observer.observe(frame));
     return () => observer.disconnect();
   }, []);
 
@@ -273,12 +447,14 @@ export default function Home() {
           NEW<br /><i>MODEL WAY</i>
         </a>
         <nav aria-label="Головна навігація">
-          <a href="#program">Програма</a>
           <a href="#author">Про авторку</a>
-          <a href="#outcomes">Результат</a>
-          <a href="#faq">FAQ</a>
+          <a href="#program">Програма</a>
+          <a href="#faq">Для кого</a>
+          <a href="#learning">Формат</a>
+          <a href="#graduation">Випускний</a>
+          <a href="#rates">Тарифи</a>
         </nav>
-        <a className="header-cta" href="#contact">Записатися <span>↗</span></a>
+        <a className="header-cta" href="#rates">Обрати тариф <span>↗</span></a>
       </header>
 
       <section className={`hero-cover ${heroReady ? "is-ready" : ""}`} id="top">
@@ -369,7 +545,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="barriers section" id="barriers">
+      <section ref={barriersRef} className={`barriers section ${barriersVisible ? "is-visible" : ""}`} id="barriers">
         <p className="eyebrow">03 / Чесна розмова</p>
         <div className="barriers-heading">
           <h2>Чому ти досі<br />не почала. <em>Чесно.</em></h2>
@@ -407,18 +583,22 @@ export default function Home() {
 
         <div className="story-intro">
           <figure className="story-portrait">
-            <img src="/images/hero-fashion-1.jpg" alt="Ірина на студійній зйомці" />
+            <picture>
+              <source media="(max-width: 760px)" srcSet="/images/iryna-story-mobile.jpg" />
+              <img src="/images/hero-fashion-1.jpg" alt="Ірина на студійній зйомці" />
+            </picture>
             <figcaption>Ірина / commercial model</figcaption>
           </figure>
           <div className="story-greeting">
             <p className="story-index">01 — ОСОБИСТА ІСТОРІЯ</p>
-            <h2>Я Ірина — <em>незалежна модель,</em> яка ніколи не вчилася в школі моделей.</h2>
+            <h2>Я Ірина<span className="story-desktop-copy"> — </span><em>незалежна модель<span className="story-desktop-copy">,</span></em><span className="story-desktop-copy"> яка ніколи не вчилася в школі моделей.</span></h2>
             <div className="story-model-mark" aria-hidden="true">
               <span className="story-model-mark-line" />
               <span className="story-model-mark-word">NMW</span>
               <span className="story-model-mark-caption">NEW MODEL WAY</span>
             </div>
           </div>
+          <p className="story-mobile-note">Я ніколи не вчилася в школі моделей.</p>
         </div>
 
         <div className="story-pages">
@@ -443,16 +623,36 @@ export default function Home() {
             <p>Робила фотосесії, відео, відмічала бренди. І бренди почали писати мені самі.</p>
           </div>
           <div className="story-milestones" aria-label="Ключові результати Ірини">
-            <article><strong>01</strong><span>тиждень</span><p>у мене була перша оплачена зйомка</p></article>
-            <article><strong>6–7</strong><span>зйомок</span><p>за перший місяць</p></article>
-            <article><strong>3</strong><span>роки</span><p>я знялася для українських та міжнародних брендів: [додати назви брендів]</p></article>
+            <article>
+              <h4>За <b>1</b> тиждень</h4>
+              <p>Отримала першу оплачувану зйомку.</p>
+            </article>
+            <article>
+              <h4><b>6–7</b> зйомок</h4>
+              <p>За перший місяць.</p>
+            </article>
+            <article>
+              <h4>За <b>3</b> роки</h4>
+              <p>Знялася для українських і міжнародних брендів.</p>
+            </article>
           </div>
         </div>
 
-        <div className="story-afterword">
-          <p><span className="afterword-text">Коли підписниці почали питати «як повторити?», я провела анкету. Виявилося, що дівчат зупиняють не гроші й не параметри, а три речі: не знають, з чого почати, бояться камери і бояться осуду.</span><span className="afterword-mark" aria-hidden="true">01</span></p>
-          <p><span className="afterword-text">Тому я зробила New Model Way. Без обіцянок «мільйонів за тиждень». Тільки інструменти, які працюють у реальній індустрії, і чіткі кроки.</span><span className="afterword-mark" aria-hidden="true">02</span></p>
-        </div>
+        <section className="story-afterword" aria-labelledby="afterword-title">
+          <div className="afterword-question">
+            <h3 id="afterword-title">Що зупиняє <em>дівчат?</em></h3>
+            <p>Коли підписниці почали питати «як повторити?», я провела анкету. Виявилося, що дівчат зупиняють не гроші й не параметри, а три речі:</p>
+            <ul className="afterword-findings">
+              <li>Не знають, з чого почати</li>
+              <li>Бояться камери</li>
+              <li>Бояться осуду</li>
+            </ul>
+          </div>
+          <div className="afterword-answer">
+            <h3>Тому я зробила <strong>New Model Way.</strong></h3>
+            <p>Без обіцянок «мільйонів за тиждень». Тільки інструменти, які працюють у реальній індустрії, і чіткі кроки.</p>
+          </div>
+        </section>
 
         <div ref={solutionRef} className={`story-solution-wrap ${solutionVisible ? "is-visible" : ""}`}>
           <div className="story-solution">
@@ -476,26 +676,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section ref={outcomesRef} className={`outcomes section ${outcomesVisible ? "is-visible" : ""}`} id="outcomes">
-        <div className="outcomes-heading">
-          <p className="eyebrow">06 / Результат навчання</p>
-          <h2>Після навчання ти знатимеш, <em>як:</em></h2>
-          <p>Не просто дивитися уроки — а впевнено працювати в кадрі, знаходити бренди та будувати професію моделі.</p>
-        </div>
-        <div className="outcomes-layout">
-          <ol className="outcomes-list">
-            {outcomes.map((outcome, index) => <li key={outcome}><span>0{index + 1}</span>{outcome}</li>)}
-          </ol>
-          <div className="outcomes-gallery" aria-label="Результати навчання у кадрі">
-            {outcomePhotos.map(([, caption], index) => (
-              <figure key={caption} className={`outcome-photo outcome-photo-${index + 1}`}>
-                <figcaption>{caption}</figcaption>
-              </figure>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section ref={courseRef} className={`course-frames section ${courseVisible ? "is-visible" : ""}`} id="program">
         <div className="course-film-grain" aria-hidden="true" />
         <header className="course-frames-heading">
@@ -511,8 +691,7 @@ export default function Home() {
                 <span className="course-frame-number">0{index + 1}</span>
                 <span className="course-frame-corner corner-a" />
                 <span className="course-frame-corner corner-b" />
-                <span className="course-frame-shine" />
-                <small>NEW MODEL WAY<br />EDITORIAL FRAME</small>
+                  <small>NEW MODEL WAY<br />EDITORIAL FRAME</small>
               </div>
               <div className="course-frame-copy">
                 <div className="course-frame-meta"><span>Модуль 0{index + 1}</span><span>кадр змін</span></div>
@@ -533,27 +712,214 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="faq section" id="faq">
-        <p className="eyebrow">FAQ</p>
-        <h2>Часті <em>запитання.</em></h2>
-        <div className="faq-list">
-          {questions.map(([question, answer], index) => (
-            <article key={question}>
-              <button onClick={() => setOpenQuestion(openQuestion === index ? null : index)} aria-expanded={openQuestion === index}>
-                {question}<span>{openQuestion === index ? "−" : "+"}</span>
-              </button>
-              {openQuestion === index && <p>{answer}</p>}
-            </article>
-          ))}
+      <section className={`audience section ${audienceVisible ? "is-visible" : ""}`} id="faq" ref={audienceRef}>
+        <div className="audience-edition" aria-hidden="true"><span>NEW MODEL WAY</span><span>CASTING ISSUE / 07</span></div>
+        <div className="audience-stage">
+          <figure className="audience-casting">
+            {/* Replace audience-casting-board.png here when the casting collage is updated. */}
+            <img src="/images/audience-casting-board.png" alt="Колаж дівчат різного типажу" />
+            <figcaption><span>CASTING BOARD</span><b>У кадрі є місце<br />для тебе.</b></figcaption>
+          </figure>
+
+          <div className="audience-content">
+            <p className="eyebrow">07 / ДЛЯ КОГО</p>
+            <h2>New Model Way<br />для тебе, <em>якщо ти:</em></h2>
+            <ol className="audience-lines">
+              <li>ніколи не працювала моделлю, але хочеш спробувати;</li>
+              <li>вже була на фотосесіях і хочеш перейти до оплачуваних;</li>
+              <li>студентка й шукаєш додатковий заробіток;</li>
+              <li>працюєш в іншій сфері й хочеш нову професію;</li>
+              <li>живеш у маленькому місті чи за кордоном.</li>
+            </ol>
+          </div>
+        </div>
+        <div className="audience-verdict"><span>досвід не потрібен</span><p>Потрібно бажання вчитися й виконувати завдання.</p><i aria-hidden="true">✦</i></div>
+      </section>
+
+      <section className={`learning section ${learningVisible ? "is-visible" : ""}`} id="learning" ref={learningRef}>
+        <header className="learning-heading">
+          <p className="eyebrow">08 / НАВЧАННЯ ОНЛАЙН</p>
+          <h2><span>Твій темп.</span><br /><em>Твій кадр.</em></h2>
+          <div className="learning-intro">
+            <p>Усе потрібне — в одному просторі: дивишся урок, виконуєш завдання й рухаєшся до свого результату.</p>
+            <div className="learning-intro-steps" aria-label="Як проходить навчання">
+              <span><b>01</b> уроки</span>
+              <i aria-hidden="true">→</i>
+              <span><b>02</b> практика</span>
+              <i aria-hidden="true">→</i>
+              <span><b>03</b> результат</span>
+            </div>
+          </div>
+        </header>
+
+        <div className="learning-platform">
+          <aside className="learning-sidebar" aria-label="Навігація навчальною платформою">
+            <p>NEW MODEL WAY</p>
+            <span className="learning-profile">ІМ</span>
+            <ul>
+              <li className="is-active"><b>01</b> Знайомство</li>
+              <li><b>02</b> Уроки</li>
+              <li><b>03</b> Практика</li>
+            </ul>
+            <small>Твій простір<br />навчання</small>
+          </aside>
+          <div className="learning-screen">
+            <div className="learning-screenbar"><span>ПЛАТФОРМА / МОДУЛЬ 01</span><i>● запис уроку</i></div>
+            <figure className="learning-video">
+              <div className="learning-video-brand" aria-label="New Model Way">
+                <span>NEW</span>
+                <span>MODEL</span>
+                <span>WAY</span>
+              </div>
+              <span className="learning-video-label">NEW MODEL WAY / INTRO</span>
+              <span className="learning-play" aria-hidden="true">▶</span>
+              <figcaption><small>Урок 01</small><b>Починаємо свій шлях у моделінгу</b></figcaption>
+            </figure>
+            <div className="learning-progress"><span>Твій прогрес</span><i><b /></i><em>01 / 06</em></div>
+          </div>
+          <div className="learning-start">
+            <p>Старт потоку</p>
+            <strong>10<span>січня</span>2027</strong>
+            <small>Залишай собі час<br /> на нову професію.</small>
+          </div>
+        </div>
+
+        <div className="learning-specs">
+          <article><span>01</span><b>Тривалість</b><p>6 тижнів</p></article>
+          <article><span>02</span><b>Формат</b><p>онлайн-відеоуроки + практичні завдання</p></article>
+          <article><span>03</span><b>Темп</b><p>зручний для тебе, з будь-якого міста чи країни</p></article>
+          <article><span>04</span><b>Підтримка</b><p>залежить від тарифу</p></article>
         </div>
       </section>
 
-      <section className="closing section" id="rates">
-        <span id="contact" aria-hidden="true" />
-        <p className="eyebrow">New Model Way / 2027</p>
-        <h2>Почни свій<br /><em>шлях.</em></h2>
-        <p>Твоя професія може початися з одного рішення.</p>
-        <a className="button" href="#contact">Записатися →</a>
+      <section className={`graduation section ${graduationVisible ? "is-visible" : ""}`} id="graduation" ref={graduationRef}>
+        <div className="graduation-edition"><span>09 / ВИПУСКНИЙ</span><span>ХМЕЛЬНИЦЬКИЙ · 2027</span></div>
+        <div className="graduation-layout">
+          <div className="graduation-copy">
+            <p className="eyebrow">ВИПУСКНИЙ У ХМЕЛЬНИЦЬКОМУ</p>
+            <h2>Ми не просто<br /> завершимо <em>навчання.</em></h2>
+            <p className="graduation-lead">Ми зустрінемося наживо.</p>
+            <ul>
+              <li>професійна зйомка digitals;</li>
+              <li>зйомка в ефектному образі;</li>
+              <li>знайомство з іншими ученицями;</li>
+              <li>спілкування, нові знайомства та святкова атмосфера;</li>
+              <li>вечірка в одному з кращих закладів міста.</li>
+            </ul>
+          </div>
+          <div className="graduation-collage" aria-label="Концептуальний колаж випускного New Model Way">
+            <div className="graduation-light" />
+            <div className="graduation-card graduation-card-main"><span>NEW MODEL<br /> WAY</span><b>GRADUATION<br />NIGHT</b></div>
+            <div
+              className="graduation-card graduation-card-ticket"
+              onPointerMove={(event) => {
+                const ticket = event.currentTarget;
+                const bounds = ticket.getBoundingClientRect();
+                const x = (event.clientX - bounds.left) / bounds.width - .5;
+                const y = (event.clientY - bounds.top) / bounds.height - .5;
+                ticket.style.setProperty("--ticket-x", `${x * 8}deg`);
+                ticket.style.setProperty("--ticket-y", `${y * -8}deg`);
+                ticket.style.setProperty("--glow-x", `${(x + .5) * 100}%`);
+                ticket.style.setProperty("--glow-y", `${(y + .5) * 100}%`);
+              }}
+              onPointerLeave={(event) => {
+                const ticket = event.currentTarget;
+                ticket.style.removeProperty("--ticket-x");
+                ticket.style.removeProperty("--ticket-y");
+                ticket.style.removeProperty("--glow-x");
+                ticket.style.removeProperty("--glow-y");
+              }}
+            ><small>ADMIT ONE</small><b>ХМЕЛЬНИЦЬКИЙ</b><i>✦</i></div>
+            <div className="graduation-card graduation-card-frame"><span>digital<br />portrait</span></div>
+            <p>ПЕРШИЙ ВИПУСК<br />ТВІЙ ПЕРШИЙ ВЕЛИКИЙ КАДР</p>
+          </div>
+        </div>
+        <aside className="graduation-note"><span>ВАЖЛИВО</span><p>Участь у випускному входить у тарифи PRO та VIP. Дорогу до Хмельницького та проживання учасниці організовують і оплачують самостійно.</p></aside>
+      </section>
+
+      <section className={`pricing section ${pricingVisible ? "is-visible" : ""}`} id="rates" ref={pricingRef}>
+        <header className="pricing-heading">
+          <p className="eyebrow">10 / ТАРИФИ</p>
+          <h2>Обери свій<br /><em>формат старту.</em></h2>
+          <div className="pricing-timer" aria-label="Акція діє до 27 листопада 2026 року">
+            <span>ціна до 27.11</span>
+            <b>{String(Math.floor(timeLeft / 86400000)).padStart(2, "0")} : {String(Math.floor(timeLeft / 3600000) % 24).padStart(2, "0")} : {String(Math.floor(timeLeft / 60000) % 60).padStart(2, "0")} : {String(Math.floor(timeLeft / 1000) % 60).padStart(2, "0")}</b>
+            <small>дні&nbsp;&nbsp;&nbsp;&nbsp;год&nbsp;&nbsp;&nbsp;&nbsp;хв&nbsp;&nbsp;&nbsp;&nbsp;сек</small>
+          </div>
+        </header>
+        <p className="pricing-swipe-hint">Гортай, щоб порівняти тарифи <span aria-hidden="true">↔</span></p>
+        <div className="pricing-grid" ref={pricingTrackRef}>
+          {pricingPlans.map((plan) => (
+            <article className={`price-card ${plan.recommended ? "is-recommended" : ""}`} key={plan.name}>
+              {plan.recommended && <span className="price-recommended">РЕКОМЕНДОВАНИЙ</span>}
+              <p className="price-name">{plan.name}{plan.recommended && <i>★</i>}</p>
+              <h3>{plan.label}</h3>
+              <div className="price-total"><small>Ціна до 27.11</small><b>{plan.current}</b><del>{plan.full}</del><em>Економія {plan.saving}</em></div>
+              <dl>
+                {priceFeatures.map((feature, index) => {
+                  const value = plan.features[index];
+                  const included = value === "✓";
+                  const excluded = value === "—";
+                  return (
+                    <div key={feature}>
+                      <dt>{feature}</dt>
+                      <dd>
+                        {included || excluded ? (
+                          <span className={included ? "price-status is-included" : "price-status"} role="img" aria-label={included ? "Входить у тариф" : "Не входить у тариф"}>
+                            {included ? "✓" : "×"}
+                          </span>
+                        ) : value}
+                      </dd>
+                    </div>
+                  );
+                })}
+                <div className="price-seats"><dt>Місця</dt><dd>{plan.seats}</dd></div>
+              </dl>
+              <a className="price-button" href="#contact">{plan.cta} <span>→</span></a>
+            </article>
+          ))}
+        </div>
+        <p className="pricing-legal"><b>Акція:</b> до 27 листопада 2026. Після цього на сайті автоматично повні ціни: 14 900 / 19 900 / 49 900 грн.</p>
+      </section>
+
+      <section className={`final-call section ${finalCallVisible ? "is-visible" : ""}`} id="contact" ref={finalCallRef}>
+        <div className="final-call-halo" aria-hidden="true" />
+        <div className="final-call-stage">
+          <div className="final-call-copy">
+            <p className="eyebrow">12 / ОСТАННІЙ КАДР</p>
+            <h2><span>Якщо закриєш</span><span>цю сторінку —</span><span><em>нічого не зміниться.</em></span></h2>
+            <p className="final-call-body">Ось що відбудеться, якщо ти просто закриєш зараз цю сторінку: нічого. І в цьому проблема. Через рік ти будеш там, де і зараз. З тією ж роботою, тими ж «колись» і тим самим голосом «у мене не вийде».</p>
+            <p className="final-call-decision">Або можеш зробити <b>перший крок сьогодні.</b></p>
+          </div>
+          <figure className="final-call-portrait final-call-photo">
+            <img src="/images/iryna-final.jpg" alt="Ірина" />
+            <span>NEW MODEL WAY<br />THE FINAL FRAME</span>
+            <strong>MAKE<br />THE<br /><em>FIRST</em><br />MOVE.</strong>
+            <i aria-hidden="true">✦</i>
+          </figure>
+        </div>
+
+        <div className="final-call-action">
+          <div className="final-call-start">
+            <span>СТАРТ НАВЧАННЯ</span>
+            <b>10 <small>СІЧНЯ · 2027</small></b>
+            <p>Ціни раннього бронювання до 27 листопада, потім дорожче.</p>
+          </div>
+          <div className="final-call-timer" aria-label="Таймер ціни раннього бронювання">
+            <span>ДО ЗМІНИ ЦІНИ</span>
+            <b><i>{String(Math.floor(timeLeft / 86400000)).padStart(2, "0")}</i><i>{String(Math.floor(timeLeft / 3600000) % 24).padStart(2, "0")}</i><i>{String(Math.floor(timeLeft / 60000) % 60).padStart(2, "0")}</i><i>{String(Math.floor(timeLeft / 1000) % 60).padStart(2, "0")}</i></b>
+            <small>дні&nbsp;&nbsp;&nbsp;&nbsp; год&nbsp;&nbsp;&nbsp;&nbsp; хв&nbsp;&nbsp;&nbsp;&nbsp; сек</small>
+          </div>
+          <div className="final-call-tariffs">
+            <p>ОБРАТИ СВІЙ ТАРИФ</p>
+            <div>
+              <a href="#rates">START <span>→</span></a>
+              <a href="#rates">PRO <span>→</span></a>
+              <a href="#rates">VIP <span>→</span></a>
+            </div>
+          </div>
+        </div>
+        <aside className="final-call-note"><b>P.S.</b><p>У PRO лише 100 місць, у VIP лише 10. Коли вони закінчаться, нових я не додам, бо інакше не встигну перевірити кожну домашку сама. Якщо хочеш, щоб я була поруч, не чекай останнього дня.</p><em>Ірина</em></aside>
       </section>
 
       <footer>© 2026 NEW MODEL WAY <span>·</span> Політика конфіденційності <span>·</span> Публічна оферта</footer>
