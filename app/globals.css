@@ -3437,7 +3437,15 @@
 .story-mobile-note { display: none; }
 
 @media (max-width: 760px) {
-  .solution-photo img { object-position: center 35%; }
+  .solution-photo {
+    min-height: 0;
+    aspect-ratio: 3 / 4;
+  }
+
+  .solution-photo img {
+    object-position: center;
+    animation: none;
+  }
 
   .iryna-story::before,
   .story-intro .story-index,
