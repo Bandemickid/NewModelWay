@@ -151,6 +151,8 @@ function LetterText({ children, startDelay }: { children: string; startDelay: nu
 export default function Home() {
   const [headerScrolled, setHeaderScrolled] = useState(false);
   const [heroReady, setHeroReady] = useState(false);
+  const [pastHero, setPastHero] = useState(false);
+  const heroRef = useRef<HTMLElement>(null);
   const [letterVisible, setLetterVisible] = useState(false);
   const [letterStage, setLetterStage] = useState<LetterStage>("waiting");
   const [dreamVisible, setDreamVisible] = useState(false);
@@ -181,6 +183,17 @@ export default function Home() {
   const pricingRef = useRef<HTMLElement>(null);
   const pricingTrackRef = useRef<HTMLDivElement>(null);
   const finalCallRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setPastHero(!entry.isIntersecting && entry.boundingClientRect.bottom <= 0);
+    });
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const track = pricingTrackRef.current;
@@ -457,7 +470,7 @@ export default function Home() {
         <a className="header-cta" href="#rates">Обрати тариф <span>↗</span></a>
       </header>
 
-      <section className={`hero-cover ${heroReady ? "is-ready" : ""}`} id="top">
+      <section className={`hero-cover ${heroReady ? "is-ready" : ""}`} id="top" ref={heroRef}>
         <div className="cover-image hero-portrait" aria-label="Портрет Ірини">
     <img src="/images/hero-portrait-wide.jpeg" alt="Ірина у fashion-образі" />
         </div>
@@ -468,8 +481,19 @@ export default function Home() {
         <div className="cover-offer">
           <p className="offer-title">Як стати незалежною моделлю та почати зніматись для брендів</p>
           <p className="offer-text">Покрокова онлайн-програма, яка допоможе тобі освоїти професію моделі, створити портфоліо, знаходити бренди та отримувати перші оплачувані замовлення.</p>
-          <a className="button" href="#contact">Записатися <span>→</span></a>
+          <a className="button" href="#rates">Записатися <span>→</span></a>
           <small>Ціни раннього бронювання діють до 27 листопада.</small>
+          {timeLeft > 0 && (
+            <div className="hero-price-countdown">
+              <span>Ціни підвищаться через</span>
+              <strong role="timer" aria-label="Дні, години, хвилини та секунди до підвищення цін">
+                {[Math.floor(timeLeft / 86400000), Math.floor(timeLeft / 3600000) % 24, Math.floor(timeLeft / 60000) % 60, Math.floor(timeLeft / 1000) % 60]
+                  .map((value) => String(value).padStart(2, "0"))
+                  .join(" : ")}
+              </strong>
+              <span>дні · год · хв · сек</span>
+            </div>
+          )}
         </div>
       </section>
 
@@ -524,15 +548,15 @@ export default function Home() {
 
           <div className="dream-contact-sheet" aria-label="Типи рекламних зйомок">
             <figure className="dream-shot dream-shot-main">
-              <img src="/images/dream-feature.jpg" alt="Портретна beauty-зйомка Ірини" />
+              <img src="/images/dream-beauty-backstage.jpg" alt="Підготовка макіяжу перед зйомкою" loading="lazy" />
               <figcaption><b>01</b> Beauty / Campaign</figcaption>
             </figure>
             <figure className="dream-shot dream-shot-top">
-              <img src="/images/hero-fashion-2.jpg" alt="Fashion-зйомка Ірини" />
+              <img src="/images/dream-fashion-backstage.jpg" alt="Ірина позує перед фотографом у студії" loading="lazy" />
               <figcaption>02 / Fashion</figcaption>
             </figure>
             <figure className="dream-shot dream-shot-bottom">
-              <img src="/images/hero-fashion-3.jpg" alt="Lifestyle-зйомка Ірини" />
+              <img src="/images/dream-lifestyle-backstage.jpg" alt="Ірина на знімальному майданчику зі студійним освітленням" loading="lazy" />
               <figcaption>03 / Lifestyle</figcaption>
             </figure>
             <span className="dream-stamp">ON SET<br />09:00—18:00</span>
@@ -571,14 +595,13 @@ export default function Home() {
         </div>
         <div className="barriers-conclusion">
           <p>Насправді тобі не потрібно чекати, поки зникнуть усі сумніви.</p>
-          <strong>Тобі потрібен зрозумілий план дій.</strong>
+          <strong>Тобі потрібно діяти по плану!</strong>
         </div>
       </section>
 
       <section ref={storyRef} className={`iryna-story section ${storyVisible ? "is-visible" : ""}`}>
         <div className="story-topline">
           <p className="eyebrow">05 / Історія Ірини</p>
-          <p>Від банківського столу — до кадру</p>
         </div>
 
         <div className="story-intro">
@@ -590,7 +613,6 @@ export default function Home() {
             <figcaption>Ірина / commercial model</figcaption>
           </figure>
           <div className="story-greeting">
-            <p className="story-index">01 — ОСОБИСТА ІСТОРІЯ</p>
             <h2>Я Ірина<span className="story-desktop-copy"> — </span><em>незалежна модель<span className="story-desktop-copy">,</span></em><span className="story-desktop-copy"> яка ніколи не вчилася в школі моделей.</span></h2>
             <div className="story-model-mark" aria-hidden="true">
               <span className="story-model-mark-line" />
@@ -629,11 +651,11 @@ export default function Home() {
             </article>
             <article>
               <h4><b>6–7</b> зйомок</h4>
-              <p>За перший місяць.</p>
+              <p>За перший місяць ці зйомки принесли стільки грошей, скільки я отримувала в банку за місяць роботи!</p>
             </article>
             <article>
               <h4>За <b>3</b> роки</h4>
-              <p>Знялася для українських і міжнародних брендів.</p>
+              <p>Я співпрацювала з брендами.</p>
             </article>
           </div>
         </div>
@@ -641,7 +663,7 @@ export default function Home() {
         <section className="story-afterword" aria-labelledby="afterword-title">
           <div className="afterword-question">
             <h3 id="afterword-title">Що зупиняє <em>дівчат?</em></h3>
-            <p>Коли підписниці почали питати «як повторити?», я провела анкету. Виявилося, що дівчат зупиняють не гроші й не параметри, а три речі:</p>
+            <p>Коли підписниці почали питати «як повторити?», я провела анкетування. Виявилося, що дівчат зупиняють не гроші й не параметри, а три речі:</p>
             <ul className="afterword-findings">
               <li>Не знають, з чого почати</li>
               <li>Бояться камери</li>
@@ -670,7 +692,7 @@ export default function Home() {
             <ul className="solution-pillars" aria-label="Складові курсу">
               <li>Навчання</li><li>Практика</li><li>Портфоліо</li><li>Клієнти</li>
             </ul>
-            <a className="button" href="#contact">Записатися <span>→</span></a>
+            <a className="button" href="#rates">Записатися <span>→</span></a>
           </div>
           </div>
         </div>
@@ -680,7 +702,7 @@ export default function Home() {
         <div className="course-film-grain" aria-hidden="true" />
         <header className="course-frames-heading">
           <p className="eyebrow">Курс New Model Way</p>
-          <h2>6 кадрів <em>до професії.</em></h2>
+          <h2>6 кроків <em>до професії.</em></h2>
           <p>Кожен модуль змінює не лише навички — а й те, як ти бачиш себе в кадрі.</p>
         </header>
 
@@ -694,7 +716,7 @@ export default function Home() {
                   <small>NEW MODEL WAY<br />EDITORIAL FRAME</small>
               </div>
               <div className="course-frame-copy">
-                <div className="course-frame-meta"><span>Модуль 0{index + 1}</span><span>кадр змін</span></div>
+                <div className="course-frame-meta"><span>Модуль 0{index + 1}</span></div>
                 <h3>{module.title}</h3>
                 <div className="course-frame-shift">
                   <section className="course-frame-before"><p>До</p><span>{module.before}</span></section>
@@ -707,7 +729,6 @@ export default function Home() {
         </div>
 
         <div className="course-frames-finale">
-          <p>Твоя система приводить клієнтів,<br /><em>поки ти будуєш кар’єру.</em></p>
           <a className="button" href="#rates">Обрати тариф <span>→</span></a>
         </div>
       </section>
@@ -726,7 +747,7 @@ export default function Home() {
             <h2>New Model Way<br />для тебе, <em>якщо ти:</em></h2>
             <ol className="audience-lines">
               <li>ніколи не працювала моделлю, але хочеш спробувати;</li>
-              <li>вже була на фотосесіях і хочеш перейти до оплачуваних;</li>
+              <li>вже маєш досвід зйомок і хочеш перетворити його на стабільну професію;</li>
               <li>студентка й шукаєш додатковий заробіток;</li>
               <li>працюєш в іншій сфері й хочеш нову професію;</li>
               <li>живеш у маленькому місті чи за кордоном.</li>
@@ -780,7 +801,7 @@ export default function Home() {
           <div className="learning-start">
             <p>Старт потоку</p>
             <strong>10<span>січня</span>2027</strong>
-            <small>Залишай собі час<br /> на нову професію.</small>
+            <small>Доступ до матеріалів — 6 місяців.</small>
           </div>
         </div>
 
@@ -887,7 +908,7 @@ export default function Home() {
         <div className="final-call-stage">
           <div className="final-call-copy">
             <p className="eyebrow">12 / ОСТАННІЙ КАДР</p>
-            <h2><span>Якщо закриєш</span><span>цю сторінку —</span><span><em>нічого не зміниться.</em></span></h2>
+            <h2><span>Якщо закриєш</span><span>цю сторінку&nbsp;—</span><span><em>нічого не зміниться.</em></span></h2>
             <p className="final-call-body">Ось що відбудеться, якщо ти просто закриєш зараз цю сторінку: нічого. І в цьому проблема. Через рік ти будеш там, де і зараз. З тією ж роботою, тими ж «колись» і тим самим голосом «у мене не вийде».</p>
             <p className="final-call-decision">Або можеш зробити <b>перший крок сьогодні.</b></p>
           </div>
@@ -923,6 +944,9 @@ export default function Home() {
       </section>
 
       <footer>© 2026 NEW MODEL WAY <span>·</span> Політика конфіденційності <span>·</span> Публічна оферта</footer>
+      <a className={`floating-enroll${pastHero ? " is-visible" : ""}`} href="#rates">
+        Записатися <span aria-hidden="true">↗</span>
+      </a>
     </main>
   );
 }
