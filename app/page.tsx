@@ -460,7 +460,7 @@ export default function Home() {
           NEW<br /><i>MODEL WAY</i>
         </a>
         <nav aria-label="Головна навігація">
-          <a href="#author">Про авторку</a>
+          <a href="#iryna-story">Про авторку</a>
           <a href="#program">Програма</a>
           <a href="#faq">Для кого</a>
           <a href="#learning">Формат</a>
@@ -599,7 +599,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section ref={storyRef} className={`iryna-story section ${storyVisible ? "is-visible" : ""}`}>
+      <section id="iryna-story" ref={storyRef} className={`iryna-story section ${storyVisible ? "is-visible" : ""}`}>
         <div className="story-topline">
           <p className="eyebrow">05 / Історія Ірини</p>
         </div>
@@ -671,7 +671,7 @@ export default function Home() {
             </ul>
           </div>
           <div className="afterword-answer">
-            <h3>Тому я зробила <strong>New Model Way.</strong></h3>
+            <h3>Тому я зробила <strong>New Model Way</strong></h3>
             <p>Без обіцянок «мільйонів за тиждень». Тільки інструменти, які працюють у реальній індустрії, і чіткі кроки.</p>
           </div>
         </section>
