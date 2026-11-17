@@ -3437,7 +3437,7 @@
 .story-mobile-note { display: none; }
 
 @media (max-width: 760px) {
-  .solution-photo img { object-position: center top; }
+  .solution-photo img { object-position: center 35%; }
 
   .iryna-story::before,
   .story-intro .story-index,

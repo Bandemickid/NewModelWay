@@ -680,7 +680,7 @@ export default function Home() {
           <div className="story-solution">
           <figure className="solution-photo">
             <span className="solution-photo-index" aria-hidden="true">01 / EDITORIAL FRAME</span>
-            <img src="/images/iryna-solution.jpg" alt="Ірина під час студійної fashion-зйомки" />
+            <img src="/images/iryna-solution-sofa.jpg" alt="Ірина під час студійної fashion-зйомки" />
             <span className="solution-glint" aria-hidden="true" />
             <figcaption>NEW MODEL WAY / ТВОЯ СИСТЕМА</figcaption>
           </figure>
