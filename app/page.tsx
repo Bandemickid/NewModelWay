@@ -830,7 +830,11 @@ export default function Home() {
           </div>
           <div className="graduation-collage" aria-label="Концептуальний колаж випускного New Model Way">
             <div className="graduation-light" />
-            <div className="graduation-card graduation-card-main"><span>NEW MODEL<br /> WAY</span><b>GRADUATION<br />NIGHT</b></div>
+            <div className="graduation-card graduation-card-main">
+              <img className="graduation-party-photo" src="/images/graduation-party.jpg" alt="Дівчата разом на вечірці" loading="lazy" />
+              <span>NEW MODEL WAY</span>
+              <b>GRADUATION<br />NIGHT</b>
+            </div>
             <div
               className="graduation-card graduation-card-ticket"
               onPointerMove={(event) => {
