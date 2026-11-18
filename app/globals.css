@@ -4014,3 +4014,59 @@
     z-index: 3;
   }
 }
+
+@media (max-width: 800px) {
+  .graduation .graduation-card-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    aspect-ratio: auto;
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  .graduation .graduation-party-photo {
+    position: static;
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  .graduation .graduation-card-main::after { display: none; }
+
+  .graduation .graduation-card-main > span {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    font-size: 9px;
+    text-shadow: 0 1px 5px #000;
+  }
+
+  .graduation .graduation-card-main > b {
+    display: block;
+    max-width: none;
+    padding: 14px;
+    background: #28131c;
+    font-size: clamp(24px, 7.2vw, 43px);
+    line-height: 1.04;
+    letter-spacing: -.06em;
+  }
+
+  .graduation .graduation-card-main > b br { display: none; }
+
+  .graduation .graduation-card-ticket {
+    justify-self: stretch;
+    width: 100%;
+    margin: 0;
+    padding: 14px 45px 14px 16px;
+    gap: 7px;
+    border: 1px solid #cb9f67;
+    border-top: 1px dashed #93663d;
+  }
+
+  .graduation .graduation-card-ticket::before { display: none; }
+  .graduation .graduation-card-ticket b { font-size: clamp(20px, 5.5vw, 31px); }
+  .graduation .graduation-card-ticket i { right: 13px; bottom: 15px; font-size: 26px; }
+  .graduation .graduation-collage > p { margin: 0; padding: 11px; }
+}
