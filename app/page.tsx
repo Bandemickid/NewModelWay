@@ -154,7 +154,7 @@ export default function Home() {
   const [pastHero, setPastHero] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
   const footerRef = useRef<HTMLElement>(null);
-  const [mobileFooterVisible, setMobileFooterVisible] = useState(false);
+  const [footerVisible, setFooterVisible] = useState(false);
   const [letterVisible, setLetterVisible] = useState(false);
   const [letterStage, setLetterStage] = useState<LetterStage>("waiting");
   const [dreamVisible, setDreamVisible] = useState(false);
@@ -201,18 +201,15 @@ export default function Home() {
     const footer = footerRef.current;
     if (!footer) return;
 
-    const mobile = window.matchMedia("(max-width: 760px)");
     const update = () => {
       const bounds = footer.getBoundingClientRect();
-      setMobileFooterVisible(mobile.matches && bounds.top < window.innerHeight && bounds.bottom > 0);
+      setFooterVisible(bounds.top < window.innerHeight && bounds.bottom > 0);
     };
     const observer = new IntersectionObserver(update);
     observer.observe(footer);
-    mobile.addEventListener("change", update);
     update();
     return () => {
       observer.disconnect();
-      mobile.removeEventListener("change", update);
     };
   }, []);
 
@@ -968,13 +965,26 @@ export default function Home() {
         <aside className="final-call-note"><b>P.S.</b><p>У PRO лише 100 місць, у VIP лише 10. Коли вони закінчаться, нових я не додам, бо інакше не встигну перевірити кожну домашку сама. Якщо хочеш, щоб я була поруч, не чекай останнього дня.</p><em>Ірина</em></aside>
       </section>
 
-      <footer ref={footerRef}>
-        © 2026 NEW MODEL WAY <span>·</span>
+      <footer className="site-footer" ref={footerRef}>
+        <div className="footer-details">
+          <div className="footer-business">
+            <span className="footer-label">Реквізити</span>
+            <p>ФОП Пономаренко<br />Ірина Денисівна</p>
+          </div>
+          <dl className="footer-bank">
+            <div><dt>ЄДРПОУ/РНОКПП</dt><dd>3619800085</dd></div>
+            <div className="footer-iban"><dt>IBAN</dt><dd>UA 26 300346 00000 2600 1100 0178 62</dd></div>
+            <div><dt>Банк</dt><dd>Sense bank м. Київ</dd></div>
+          </dl>
+        </div>
+        <div className="footer-bottom">
+        <span>© 2026 NEW MODEL WAY</span>
         <a href="/documents/new-model-way-privacy-policy.pdf" download="Політика_конфіденційності_New_Model_Way.pdf">Політика конфіденційності</a>
         <span>·</span>
         <a href="/documents/new-model-way-public-offer.pdf" download="Договір_публічної_оферти_New_Model_Way.pdf">Публічна оферта</a>
+        </div>
       </footer>
-      <a className={`floating-enroll${pastHero && !mobileFooterVisible ? " is-visible" : ""}`} href="#rates">
+      <a className={`floating-enroll${pastHero && !footerVisible ? " is-visible" : ""}`} href="#rates">
         Записатися <span aria-hidden="true">↗</span>
       </a>
     </main>
