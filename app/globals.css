@@ -688,7 +688,7 @@
   }
   .cover-image.hero-portrait img {
     height: 88%;
-    object-position: 73.5% calc(23% + var(--portrait-offset));
+    object-position: 58% calc(23% + var(--portrait-offset));
     mask-image: linear-gradient(to bottom, transparent var(--portrait-offset), #000 calc(var(--portrait-offset) + 30px), #000 79%, transparent);
   }
   .hero-brand{top:clamp(100px,15vh,128px);left:20px;font-size:clamp(29px,9vw,39px)}
@@ -4069,4 +4069,17 @@
   .graduation .graduation-card-ticket b { font-size: clamp(20px, 5.5vw, 31px); }
   .graduation .graduation-card-ticket i { right: 13px; bottom: 15px; font-size: 26px; }
   .graduation .graduation-collage > p { margin: 0; padding: 11px; }
+}
+
+@media (min-width: 761px) {
+  .hero-cover .cover-image.hero-portrait img {
+    top: 28px;
+    left: 12%;
+    right: auto;
+    object-position: left 43%;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 17%);
+    mask-image: linear-gradient(90deg, transparent, #000 17%);
+  }
+
+  .hero-cover .cover-image.hero-portrait { background: #340c1c; }
 }

@@ -472,7 +472,7 @@ export default function Home() {
 
       <section className={`hero-cover ${heroReady ? "is-ready" : ""}`} id="top" ref={heroRef}>
         <div className="cover-image hero-portrait" aria-label="Портрет Ірини">
-    <img src="/images/hero-portrait-wide.jpeg" alt="Ірина у fashion-образі" />
+    <img src="/images/hero-portrait-f1.jpg" alt="Ірина у fashion-образі" />
         </div>
         <p className="hero-brand">NEW MODEL WAY</p>
         <div className="cover-title" aria-label="Ти мріяла, уявляла, але ніхто не пояснив тобі, що робити"><span>Ти мріяла, уявляла,</span><span>але ніхто не пояснив</span><em>тобі, що робити...</em></div>
