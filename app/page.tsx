@@ -139,11 +139,19 @@ type LetterStage = "waiting" | "sealed" | "cracked" | "opened";
 function LetterText({ children, startDelay }: { children: string; startDelay: number }) {
   return (
     <p className="letter-typed-text">
-      {Array.from(children).map((character, index) => (
-        <span key={`${character}-${index}`} className="letter-character" style={{ animationDelay: `${startDelay + index * 0.008}s` }}>
-          {character === " " ? "\u00a0" : character}
-        </span>
-      ))}
+      {children.split(/(\s+)/).map((word, wordIndex, words) => {
+        if (/^\s+$/.test(word)) return word;
+        const offset = words.slice(0, wordIndex).join("").length;
+        return (
+          <span className="letter-word" key={wordIndex}>
+            {Array.from(word).map((character, index) => (
+              <span key={index} className="letter-character" style={{ animationDelay: `${startDelay + (offset + index) * 0.008}s` }}>
+                {character}
+              </span>
+            ))}
+          </span>
+        );
+      })}
     </p>
   );
 }
