@@ -153,6 +153,8 @@ export default function Home() {
   const [heroReady, setHeroReady] = useState(false);
   const [pastHero, setPastHero] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
+  const footerRef = useRef<HTMLElement>(null);
+  const [mobileFooterVisible, setMobileFooterVisible] = useState(false);
   const [letterVisible, setLetterVisible] = useState(false);
   const [letterStage, setLetterStage] = useState<LetterStage>("waiting");
   const [dreamVisible, setDreamVisible] = useState(false);
@@ -193,6 +195,25 @@ export default function Home() {
     });
     observer.observe(hero);
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer) return;
+
+    const mobile = window.matchMedia("(max-width: 760px)");
+    const update = () => {
+      const bounds = footer.getBoundingClientRect();
+      setMobileFooterVisible(mobile.matches && bounds.top < window.innerHeight && bounds.bottom > 0);
+    };
+    const observer = new IntersectionObserver(update);
+    observer.observe(footer);
+    mobile.addEventListener("change", update);
+    update();
+    return () => {
+      observer.disconnect();
+      mobile.removeEventListener("change", update);
+    };
   }, []);
 
   useEffect(() => {
@@ -947,8 +968,13 @@ export default function Home() {
         <aside className="final-call-note"><b>P.S.</b><p>У PRO лише 100 місць, у VIP лише 10. Коли вони закінчаться, нових я не додам, бо інакше не встигну перевірити кожну домашку сама. Якщо хочеш, щоб я була поруч, не чекай останнього дня.</p><em>Ірина</em></aside>
       </section>
 
-      <footer>© 2026 NEW MODEL WAY <span>·</span> Політика конфіденційності <span>·</span> Публічна оферта</footer>
-      <a className={`floating-enroll${pastHero ? " is-visible" : ""}`} href="#rates">
+      <footer ref={footerRef}>
+        © 2026 NEW MODEL WAY <span>·</span>
+        <a href="/documents/new-model-way-privacy-policy.pdf" download="Політика_конфіденційності_New_Model_Way.pdf">Політика конфіденційності</a>
+        <span>·</span>
+        <a href="/documents/new-model-way-public-offer.pdf" download="Договір_публічної_оферти_New_Model_Way.pdf">Публічна оферта</a>
+      </footer>
+      <a className={`floating-enroll${pastHero && !mobileFooterVisible ? " is-visible" : ""}`} href="#rates">
         Записатися <span aria-hidden="true">↗</span>
       </a>
     </main>
