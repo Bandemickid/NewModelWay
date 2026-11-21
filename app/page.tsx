@@ -376,7 +376,7 @@ export default function Home() {
         setTurnVisible(true);
         observer.disconnect();
       }
-    }, { threshold: 0.3 });
+    }, { threshold: 0, rootMargin: "0px 0px -40px 0px" });
     observer.observe(turn);
     return () => observer.disconnect();
   }, []);
