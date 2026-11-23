@@ -4198,3 +4198,43 @@ footer a:focus-visible { outline: 2px solid #efd097; outline-offset: 4px; }
     opacity: .12;
   }
 }
+
+.icon-arrow-up {
+  position: relative;
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  color: inherit;
+}
+
+.icon-arrow-up::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 1px;
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+}
+
+.icon-arrow-up::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 0;
+  width: 17px;
+  height: 2px;
+  background: currentColor;
+  transform: rotate(-45deg);
+}
+
+.icon-play {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 4px;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 16px solid currentColor;
+}

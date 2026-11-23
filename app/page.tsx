@@ -493,7 +493,7 @@ export default function Home() {
           <a href="#graduation">Випускний</a>
           <a href="#rates">Тарифи</a>
         </nav>
-        <a className="header-cta" href="#rates">Обрати тариф <span>↗</span></a>
+        <a className="header-cta" href="#rates">Обрати тариф <span><i className="icon-arrow-up" aria-hidden="true" /></span></a>
       </header>
 
       <section className={`hero-cover ${heroReady ? "is-ready" : ""}`} id="top" ref={heroRef}>
@@ -681,7 +681,7 @@ export default function Home() {
             </article>
             <article>
               <h4>За <b>3</b> роки</h4>
-              <p>Я співпрацювала з брендами.</p>
+              <p>Я співпрацювала з брендами: ROZETKA, Сільпо, Pepsi, Mindly, Armani, Dior, Calvin Klein, Tommy Hilfiger, Moroccanoil, Philips, NutriBullet.</p>
             </article>
           </div>
         </div>
@@ -819,7 +819,7 @@ export default function Home() {
                 <span>WAY</span>
               </div>
               <span className="learning-video-label">NEW MODEL WAY / INTRO</span>
-              <span className="learning-play" aria-hidden="true">▶</span>
+              <span className="learning-play" aria-hidden="true"><i className="icon-play" /></span>
               <figcaption><small>Урок 01</small><b>Починаємо свій шлях у моделінгу</b></figcaption>
             </figure>
             <div className="learning-progress"><span>Твій прогрес</span><i><b /></i><em>01 / 06</em></div>
@@ -993,7 +993,7 @@ export default function Home() {
         </div>
       </footer>
       <a className={`floating-enroll${pastHero && !footerVisible ? " is-visible" : ""}`} href="#rates">
-        Записатися <span aria-hidden="true">↗</span>
+        Записатися <span aria-hidden="true"><i className="icon-arrow-up" /></span>
       </a>
     </main>
   );
