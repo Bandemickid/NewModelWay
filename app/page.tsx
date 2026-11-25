@@ -498,7 +498,13 @@ export default function Home() {
 
       <section className={`hero-cover ${heroReady ? "is-ready" : ""}`} id="top" ref={heroRef}>
         <div className="cover-image hero-portrait" aria-label="Портрет Ірини">
-    <img src="/images/hero-portrait-f1.jpg" alt="Ірина у fashion-образі" />
+    <img
+      src="/images/hero-portrait-f1.jpg"
+      srcSet="/images/hero-portrait-f1.jpg 2600w, /images/hero-portrait-f1-original.jpg 5056w"
+      sizes="(max-width: 760px) 1800px, 100vw"
+      fetchPriority="high"
+      alt="Ірина у fashion-образі"
+    />
         </div>
         <p className="hero-brand">NEW MODEL WAY</p>
         <div className="cover-title" aria-label="Ти мріяла, уявляла, але ніхто не пояснив тобі, що робити"><span>Ти мріяла, уявляла,</span><span>але ніхто не пояснив</span><em>тобі, що робити...</em></div>
@@ -847,7 +853,7 @@ export default function Home() {
             <h2>Ми не просто<br /> завершимо <em>навчання.</em></h2>
             <p className="graduation-lead">Ми зустрінемося наживо.</p>
             <ul>
-              <li>професійна зйомка digitals;</li>
+              <li>професійна зйомка снепів;</li>
               <li>зйомка в ефектному образі;</li>
               <li>знайомство з іншими ученицями;</li>
               <li>спілкування, нові знайомства та святкова атмосфера;</li>
