@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { plans, promotionDeadline, priceAt, formatPrice } from "@/lib/pricing";
 
 const barriers = [
   ["Я не знаю, з чого почати.", "Це не твоя вина. Ніхто не показує свої перші кроки. Я покажу."],
@@ -11,7 +12,7 @@ const barriers = [
   ["Хочу заробляти на зйомках, але в мене немає зв’язків.", "Тепер у тебе є я. Зовсім скоро з’являться сотні знайомих у світі моделінгу."],
 ];
 
-const promotionDeadline = new Date("2026-11-27T23:59:59+02:00").getTime();
+
 
 const pricingPlans = [
   {
@@ -179,6 +180,44 @@ export default function Home() {
   // Keep the first server and browser render identical. The real countdown starts
   // immediately after hydration in the effect below.
   const [timeLeft, setTimeLeft] = useState(0);
+  const [paying, setPaying] = useState<string | null>(null);
+  const [paymentError, setPaymentError] = useState('');
+  const [testPrices, setTestPrices] = useState<Record<string, number> | null>(null);
+  useEffect(() => {
+    let active = true;
+    fetch('/api/wayforpay/purchase', { cache: 'no-store' }).then(r => r.json()).then(data => {
+      if (active && data.testMode) setTestPrices(Object.fromEntries(data.plans.map((p: {name: string; amount: number}) => [p.name, p.amount])));
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+  const [pricingNow, setPricingNow] = useState<number | null>(null);
+  useEffect(() => {
+    const update = () => setPricingNow(Date.now());
+    update(); const timer = window.setInterval(update, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+  async function checkout(plan: string) {
+    if (paying) return;
+    setPaying(plan); setPaymentError('');
+    try {
+      const response = await fetch('/api/wayforpay/purchase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ plan }) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error);
+      const analytics = window as typeof window & { fbq?: (...args: unknown[]) => void; gtag?: (...args: unknown[]) => void };
+      try {
+        analytics.fbq?.('track', 'InitiateCheckout', { content_name: plan, value: data.amount, currency: 'UAH' });
+        analytics.gtag?.('event', 'begin_checkout', { currency: 'UAH', value: data.amount, items: [{ item_name: plan, price: data.amount, quantity: 1 }] });
+      } catch { /* Analytics must not interrupt payment. */ }
+      const form = document.createElement('form'); form.method = 'POST'; form.action = 'https://secure.wayforpay.com/pay'; form.acceptCharset = 'UTF-8';
+      for (const [key, value] of Object.entries(data)) {
+        for (const item of Array.isArray(value) ? value : [value]) {
+          const input = document.createElement('input'); input.type = 'hidden'; input.name = Array.isArray(value) ? key + '[]' : key; input.value = String(item); form.appendChild(input);
+        }
+      }
+      document.body.appendChild(form); form.submit(); form.remove();
+    } catch (error) { setPaymentError(error instanceof Error ? error.message : 'Не вдалося відкрити оплату. Спробуйте ще раз.'); }
+    finally { setPaying(null); }
+  }
   const letterRef = useRef<HTMLElement>(null);
   const letterSequenceStarted = useRef(false);
   const dreamRef = useRef<HTMLElement>(null);
@@ -898,11 +937,11 @@ export default function Home() {
         <header className="pricing-heading">
           <p className="eyebrow">10 / ТАРИФИ</p>
           <h2>Обери свій<br /><em>формат старту.</em></h2>
-          <div className="pricing-timer" aria-label="Акція діє до 27 листопада 2026 року">
+          {timeLeft > 0 && <div className="pricing-timer" aria-label="Акція діє до 27 листопада 2026 року">
             <span>ціна до 27.11</span>
             <b>{String(Math.floor(timeLeft / 86400000)).padStart(2, "0")} : {String(Math.floor(timeLeft / 3600000) % 24).padStart(2, "0")} : {String(Math.floor(timeLeft / 60000) % 60).padStart(2, "0")} : {String(Math.floor(timeLeft / 1000) % 60).padStart(2, "0")}</b>
             <small>дні&nbsp;&nbsp;&nbsp;&nbsp;год&nbsp;&nbsp;&nbsp;&nbsp;хв&nbsp;&nbsp;&nbsp;&nbsp;сек</small>
-          </div>
+          </div>}
         </header>
         <p className="pricing-swipe-hint">Гортай, щоб порівняти тарифи <span aria-hidden="true">↔</span></p>
         <div className="pricing-grid" ref={pricingTrackRef}>
@@ -911,7 +950,7 @@ export default function Home() {
               {plan.recommended && <span className="price-recommended">РЕКОМЕНДОВАНИЙ</span>}
               <p className="price-name">{plan.name}{plan.recommended && <i>★</i>}</p>
               <h3>{plan.label}</h3>
-              <div className="price-total"><small>Ціна до 27.11</small><b>{plan.current}</b><del>{plan.full}</del><em>Економія {plan.saving}</em></div>
+              <div className="price-total"><small>{testPrices ? 'Тестова оплата' : pricingNow !== null && pricingNow < promotionDeadline ? 'Ціна до 27.11' : 'Вартість курсу'}</small><b>{pricingNow === null ? '…' : formatPrice(testPrices?.[plan.name] ?? priceAt(plans.find(p => p.name === plan.name)!, pricingNow))}</b>{!testPrices && pricingNow !== null && pricingNow < promotionDeadline && <><del>{plan.full}</del><em>Економія {plan.saving}</em></>}</div>
               <dl>
                 {priceFeatures.map((feature, index) => {
                   const value = plan.features[index];
@@ -932,10 +971,11 @@ export default function Home() {
                 })}
                 <div className="price-seats"><dt>Місця</dt><dd>{plan.seats}</dd></div>
               </dl>
-              <a className="price-button" href="#contact">{plan.cta} <span>→</span></a>
+              <button className="price-button" type="button" disabled={paying !== null || pricingNow === null} onClick={() => checkout(plan.name)}>{paying === plan.name ? "Відкриваємо оплату…" : plan.cta} <span>→</span></button>
             </article>
           ))}
         </div>
+        {paymentError && <p className="payment-error" role="alert">{paymentError}</p>}
         <p className="pricing-legal"><b>Акція:</b> до 27 листопада 2026. Після цього на сайті автоматично повні ціни: 14 900 / 19 900 / 49 900 грн.</p>
       </section>
 

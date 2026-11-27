@@ -4238,3 +4238,10 @@ footer a:focus-visible { outline: 2px solid #efd097; outline-offset: 4px; }
   border-bottom: 10px solid transparent;
   border-left: 16px solid currentColor;
 }
+
+.price-button { width:100%; cursor:pointer; font:inherit; }
+.price-button:disabled { opacity:.65; cursor:wait; }
+.payment-error { color:#751f33; text-align:center; padding:1rem; }
+.payment-result { min-height:100svh; background:#2a121b; color:#fff3df; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:2rem; gap:2rem; }
+.payment-result h1 { font-family:Georgia,serif; font-size:clamp(2.5rem,7vw,5rem); }
+.payment-result p { max-width:38rem; font-size:1.2rem; }
